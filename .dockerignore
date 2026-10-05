@@ -1,0 +1,3 @@
+# The api image only needs requirements.txt; code is bind-mounted at runtime
+*
+!src/requirements.txt

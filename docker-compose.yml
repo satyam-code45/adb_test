@@ -1,4 +1,3 @@
-version: '2'
 services:
   api:
     build: .
@@ -6,29 +5,31 @@ services:
     command: bash -c "cd /src/rest && python manage.py runserver 0.0.0.0:8000"
     ports:
       - "8000:8000"
-    links:
+    depends_on:
       - mongo
     volumes:
-      - ${ADBREW_CODEBASE_PATH}/tmp:/tmp
-      - ${ADBREW_CODEBASE_PATH}:/src
+      - ${ADBREW_CODEBASE_PATH:-./src}/tmp:/tmp
+      - ${ADBREW_CODEBASE_PATH:-./src}:/src
 
   app:
-    build: .
+    # react-scripts 4 (webpack 4) doesn't run on Node 17+
+    image: node:16
     container_name: app
     command: bash -c "cd /src/app && yarn install && yarn start"
     ports:
       - "3000:3000"
     volumes:
-      - ${ADBREW_CODEBASE_PATH}:/src
+      - ${ADBREW_CODEBASE_PATH:-./src}:/src
 
   mongo:
-    build: .
+    # 4.4 matches the server the original image installed and what pymongo 3.11 supports
+    image: mongo:4.4
     container_name: mongo
     restart: always
     ports:
       - "27017:27017"
     volumes:
-      - ${ADBREW_CODEBASE_PATH}/db/:/data/db
-    command: /usr/bin/mongod --bind_ip 0.0.0.0
+      - mongo_data:/data/db
 
-    
+volumes:
+  mongo_data:
