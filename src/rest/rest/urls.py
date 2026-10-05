@@ -14,8 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
-from .views import TodoListView
 
 urlpatterns = [
-    path('todos/', TodoListView.as_view(), name='signup'),
+    path('', include('todos.urls')),
 ]
