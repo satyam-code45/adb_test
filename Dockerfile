@@ -1,7 +1,6 @@
 # set base image (host OS)
 FROM python:3.8-slim
 
-ENV ENV_TYPE staging
 ENV MONGO_HOST mongo
 ENV MONGO_PORT 27017
 ##########

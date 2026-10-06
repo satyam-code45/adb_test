@@ -22,7 +22,11 @@ class FakeTodoRepository:
         return self.todos
 
     def create(self, description):
-        todo = {'id': str(len(self.todos) + 1), 'description': description}
+        todo = {
+            'id': str(len(self.todos) + 1),
+            'description': description,
+            'created_at': '2026-01-01T00:00:00+00:00',
+        }
         self.todos.append(todo)
         return todo
 
@@ -38,11 +42,15 @@ class ValidateDescriptionTests(SimpleTestCase):
             {'description': '   '},
             {'description': 42},
             {'description': 'x' * (MAX_DESCRIPTION_LENGTH + 1)},
-            ['not', 'a', 'dict'],
         ]
         for data in cases:
             with self.subTest(data=data), self.assertRaises(ValidationError):
                 validate_description(data)
+
+    def test_rejects_body_that_is_not_an_object(self):
+        with self.assertRaises(ValidationError) as ctx:
+            validate_description(['not', 'a', 'dict'])
+        self.assertIn('non_field_errors', ctx.exception.detail)
 
 
 class TodoListViewTests(SimpleTestCase):
@@ -74,7 +82,7 @@ class TodoListViewTests(SimpleTestCase):
         response = self.call(request, repository)
 
         self.assertEqual(response.status_code, 400)
-        self.assertIn('description', response.data)
+        self.assertEqual(response.data, {'description': ['This field may not be blank.']})
         self.assertEqual(repository.todos, [])
 
     def test_database_error_returns_503(self):
@@ -101,6 +109,10 @@ class TodoRoutingTests(SimpleTestCase):
                     path, {'description': 'x'}, content_type='application/json'
                 )
                 self.assertEqual(response.status_code, 201)
+
+    def test_post_rejects_non_json_body(self):
+        response = self.client.post('/todos', {'description': 'x'})  # multipart form
+        self.assertEqual(response.status_code, 415)
 
 
 class TodoRepositoryTests(SimpleTestCase):

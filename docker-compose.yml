@@ -15,7 +15,7 @@ services:
     # react-scripts 4 (webpack 4) doesn't run on Node 17+
     image: node:16
     container_name: app
-    command: bash -c "cd /src/app && yarn install && yarn start"
+    command: bash -c "cd /src/app && yarn install --frozen-lockfile && yarn start"
     ports:
       - "3000:3000"
     volumes:

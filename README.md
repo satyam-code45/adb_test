@@ -65,7 +65,8 @@ Body:
 |---|---|
 | `201` | Created, returns the new todo in the same shape as above |
 | `400` | `description` missing, not a string, blank, or over 200 characters, e.g. `{"description": ["This field may not be blank."]}` |
-| `400` | Body isn't valid JSON |
+| `400` | Body isn't valid JSON, or isn't a JSON object, e.g. `{"non_field_errors": ["Request body must be a JSON object."]}` |
+| `415` | Body isn't `application/json` |
 | `503` | MongoDB can't be reached, `{"detail": "Database is unavailable, please try again later."}` |
 
 Both `/todos` and `/todos/` work.
@@ -122,7 +123,8 @@ The setup as given didn't build or start. In the order I hit them:
 5. **Django created an SQLite file** (`src/rest/mydatabase`) on every start even though nothing used it. **Fix:** `DATABASES = {}`.
 6. **The api image was 1.46 GB.** It installed nginx, git, nano and the yarn repo, and `requirements.txt` pulled in Jupyter, pandas, matplotlib and Celery, none of which the API uses. **Fix:** `python:3.8-slim` and only the packages the code imports, which brings it to about 160 MB.
 7. **`127.0.0.1:8000` returned 400** because `ALLOWED_HOSTS` only had `localhost`. **Fix:** added `127.0.0.1`.
-8. Smaller things: removed the obsolete `version` key, replaced `links` with `depends_on`, and ignored `__pycache__`, `.eslintcache` and `src/tmp/` in git.
+8. **Leftover template settings.** `settings.py` still installed `admin`, `auth`, `sessions` and `messages` (all of which need a SQL database), printed `BASE_DIR` on every command and had unused imports. **Fix:** removed them. DRF's default anonymous user comes from `django.contrib.auth`, so `UNAUTHENTICATED_USER` is set to `None`.
+9. Smaller things: removed the obsolete `version` key, replaced `links` with `depends_on`, `yarn install --frozen-lockfile` so installs match `yarn.lock`, removed the unused `ENV_TYPE`, CRA logo and CRA README, and ignored `__pycache__`, `.eslintcache` and `src/tmp/` in git.
 
 ## What I'd add next
 

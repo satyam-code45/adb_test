@@ -23,7 +23,7 @@ function errorMessage(body) {
   if (!body) return null;
   if (body.detail) return body.detail;
   const [first] = Object.values(body);
-  return Array.isArray(first) ? first[0] : null;
+  return Array.isArray(first) ? first[0] : first;
 }
 
 export function fetchTodos() {
